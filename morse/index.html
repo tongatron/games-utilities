@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulatore Morse — Circuiti Analogici</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --hi:         #ffffff;
+      --mid:        #aaaaaa;
+      --dim:        #555555;
+      --dark:       #222222;
+      --bg:         #0a0a0a;
+      --panel:      #111111;
+      --border:     rgba(255,255,255,0.10);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--hi);
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────── */
+    header {
+      background: linear-gradient(180deg, #181818 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    header h1 {
+      font-size: 1.35rem;
+      letter-spacing: .35em;
+      text-shadow: 0 0 22px rgba(255,255,255,0.4);
+    }
+    header .sub {
+      font-size: .6rem;
+      color: var(--dim);
+      letter-spacing: .25em;
+    }
+
+    /* ── LAYOUT ──────────────────────────────── */
+    .content {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 18px 16px;
+      display: grid;
+      gap: 14px;
+    }
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 640px) { .row-2 { grid-template-columns: 1fr; } }
+
+    /* ── PANEL ───────────────────────────────── */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 11px 14px;
+    }
+    .panel-label {
+      font-size: .58rem;
+      letter-spacing: .3em;
+      color: var(--dim);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+
+    /* LED */
+    .led {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--dark);
+      flex-shrink: 0;
+      transition: background .04s, box-shadow .04s;
+    }
+    .led.on { background: var(--hi); box-shadow: 0 0 7px rgba(255,255,255,.6); }
+
+    /* ── CIRCUIT SVG ─────────────────────────── */
+    #circuit-svg { display: block; width: 100%; height: 230px; }
+
+    /* wire default */
+    .w { stroke: var(--dark); stroke-width: 1.8; fill: none; }
+
+    @keyframes flow { to { stroke-dashoffset: -20; } }
+    .w.active {
+      stroke: var(--hi);
+      filter: url(#wglow);
+      stroke-dasharray: 10 6;
+      animation: flow .38s linear infinite;
+    }
+
+    /* ── OSCILLOSCOPE ────────────────────────── */
+    #osc { display: block; width: 100%; height: 215px; }
+    .osc-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: .58rem;
+      color: var(--dim);
+      margin-top: 5px;
+    }
+    #osc-status { color: var(--mid); transition: color .1s; }
+    #osc-status.tx { color: var(--hi); }
+
+    /* ── CONTROLS ────────────────────────────── */
+    .ctrl-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    input[type=text] {
+      flex: 1;
+      min-width: 180px;
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+      color: var(--hi);
+      padding: 9px 13px;
+      font-family: inherit;
+      font-size: .85rem;
+      border-radius: 2px;
+      outline: none;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    input[type=text]::placeholder { color: var(--dark); text-transform: none; }
+    input[type=text]:focus { border-color: var(--mid); }
+
+    .btn {
+      background: #181818;
+      border: 1px solid var(--dim);
+      color: var(--hi);
+      padding: 9px 18px;
+      font-family: inherit;
+      font-size: .72rem;
+      letter-spacing: .15em;
+      cursor: pointer;
+      border-radius: 2px;
+      white-space: nowrap;
+      transition: background .08s, box-shadow .08s;
+    }
+    .btn:hover:not(:disabled) {
+      background: rgba(255,255,255,.08);
+      box-shadow: 0 0 10px rgba(255,255,255,.1);
+    }
+    .btn:disabled { opacity: .3; cursor: default; }
+    .btn.stop { border-color: #555; color: var(--mid); }
+    .btn.stop:hover:not(:disabled) { background: rgba(255,255,255,.05); }
+
+    .speed-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: .65rem;
+      color: var(--dim);
+      white-space: nowrap;
+    }
+    input[type=range] { width: 85px; accent-color: var(--hi); cursor: pointer; }
+
+    /* ── MORSE DISPLAY ───────────────────────── */
+    #morse-out {
+      min-height: 34px;
+      font-size: 1.05rem;
+      letter-spacing: .2em;
+      line-height: 1.7;
+      word-break: break-all;
+    }
+    .mc-pending { color: var(--dark); }
+    .mc-active  { color: #ffffff; text-shadow: 0 0 14px #fff, 0 0 28px rgba(255,255,255,.4); }
+    .mc-done    { color: var(--dim); }
+
+    /* ── LOG ─────────────────────────────────── */
+    #log { font-size: .78rem; color: var(--dim); min-height: 22px; }
+
+    /* ── MORSE TABLE ─────────────────────────── */
+    .table-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+      gap: 4px;
+      font-size: .6rem;
+    }
+    .table-cell {
+      background: #0d0d0d;
+      border: 1px solid var(--dark);
+      padding: 4px 6px;
+      display: flex;
+      justify-content: space-between;
+      gap: 4px;
+    }
+    .table-cell .ch  { color: var(--hi); font-weight: bold; }
+    .table-cell .cod { color: var(--dim); letter-spacing: .1em; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>SIMULATORE MORSE</h1>
+  <span class="sub">TELEGRAFIA — CIRCUITI ANALOGICI — PORTANTE RF 700 Hz</span>
+</header>
+
+<div class="content">
+
+  <!-- ROW 1: circuit + oscilloscope -->
+  <div class="row-2">
+
+    <!-- Circuit panel -->
+    <div class="panel">
+      <div class="panel-label">
+        <div class="led" id="led-circ"></div>
+        SCHEMA CIRCUITALE
+      </div>
+      <svg id="circuit-svg" viewBox="0 0 375 215" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="wglow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="2.5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="cglow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="4" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- ======== WIRES ======== -->
+        <!-- battery+ → key -->
+        <path id="w1" class="w" d="M 62,52 L 145,52"/>
+        <!-- key → coil top -->
+        <path id="w2" class="w" d="M 187,52 L 308,52"/>
+        <!-- right top → coil -->
+        <path id="w3" class="w" d="M 308,52 L 308,85"/>
+        <!-- coil → capacitor -->
+        <path id="w4" class="w" d="M 308,137 L 308,152"/>
+        <!-- capacitor → bottom -->
+        <path id="w5" class="w" d="M 308,172 L 308,188"/>
+        <!-- bottom wire -->
+        <path id="w6" class="w" d="M 308,188 L 62,188"/>
+        <!-- battery- -->
+        <path id="w7" class="w" d="M 62,188 L 62,165"/>
+        <!-- battery+ top -->
+        <path id="w8" class="w" d="M 62,75 L 62,52"/>
+        <!-- speaker branch -->
+        <path id="w9" class="w" d="M 308,111 L 342,111"/>
+
+        <!-- ======== BATTERY ======== -->
+        <g id="battery">
+          <rect x="47" y="78" width="30" height="84" rx="2"
+                stroke="#333" stroke-width="1" fill="#181818"/>
+          <line x1="51" y1="93"  x2="73" y2="93"  stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <line x1="56" y1="104" x2="68" y2="104" stroke="#fff" stroke-width="1.5"/>
+          <line x1="51" y1="115" x2="73" y2="115" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <line x1="56" y1="126" x2="68" y2="126" stroke="#fff" stroke-width="1.5"/>
+          <line x1="51" y1="137" x2="73" y2="137" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+          <line x1="56" y1="148" x2="68" y2="148" stroke="#fff" stroke-width="1.5"/>
+          <text x="62" y="73" text-anchor="middle" font-size="9" fill="#aaa" font-family="monospace">+</text>
+          <text x="62" y="175" text-anchor="middle" font-size="9" fill="#aaa" font-family="monospace">−</text>
+          <text x="62" y="198" text-anchor="middle" font-size="7" fill="#444" font-family="monospace">BATT</text>
+        </g>
+
+        <!-- ======== TELEGRAPH KEY ======== -->
+        <g id="tkey">
+          <rect x="143" y="56" width="10" height="17" rx="1"
+                stroke="#444" stroke-width="1" fill="#1a1a1a"/>
+          <circle cx="148" cy="65" r="2.5" fill="#888"/>
+          <line id="key-lever" x1="148" y1="65" x2="190" y2="58"
+                stroke="#888" stroke-width="3" stroke-linecap="round"/>
+          <circle id="key-knob" cx="190" cy="58" r="5" fill="#555"/>
+          <circle cx="148" cy="52" r="2" fill="#444"/>
+          <text x="165" y="43" text-anchor="middle" font-size="6.5" fill="#333" font-family="monospace">TASTO</text>
+          <text x="165" y="38" text-anchor="middle" font-size="6.5" fill="#333" font-family="monospace">TELEGRAFICO</text>
+        </g>
+
+        <!-- ======== INDUCTOR (coil) ======== -->
+        <line x1="295" y1="88" x2="295" y2="134" stroke="#333" stroke-width="1.2"/>
+        <line x1="292" y1="88" x2="292" y2="134" stroke="#333" stroke-width="1.2"/>
+        <path id="coil" d="M 308,85
+          a 9,9 0 0 1 0,17
+          a 9,9 0 0 1 0,17
+          a 9,9 0 0 1 0,18"
+          stroke="#333" stroke-width="2.2" fill="none"/>
+        <text x="326" y="108" text-anchor="start" font-size="7" fill="#444" font-family="monospace">L</text>
+        <text x="326" y="117" text-anchor="start" font-size="7" fill="#444" font-family="monospace">BOBINA</text>
+
+        <!-- ======== CAPACITOR ======== -->
+        <line id="cap1" x1="296" y1="152" x2="320" y2="152" stroke="#333" stroke-width="2.5"/>
+        <line id="cap2" x1="296" y1="172" x2="320" y2="172" stroke="#333" stroke-width="2.5"/>
+        <text x="325" y="159" text-anchor="start" font-size="7" fill="#444" font-family="monospace">C</text>
+        <text x="325" y="168" text-anchor="start" font-size="7" fill="#444" font-family="monospace">COND.</text>
+
+        <!-- ======== SPEAKER ======== -->
+        <polygon id="spk-body" points="342,103 342,119 356,124 356,97"
+                 stroke="#333" stroke-width="1.5" fill="#181818"/>
+        <line x1="356" y1="97"  x2="364" y2="94"  id="spk-f1" stroke="#2a2a2a" stroke-width="1.2"/>
+        <line x1="356" y1="124" x2="364" y2="127" id="spk-f2" stroke="#2a2a2a" stroke-width="1.2"/>
+        <line x1="364" y1="94"  x2="364" y2="127" id="spk-f3" stroke="#2a2a2a" stroke-width="1.2"/>
+        <path id="sw1" d="M 368,104 Q 374,111 368,118" stroke="#2a2a2a" stroke-width="1.2" fill="none"/>
+        <path id="sw2" d="M 373,101 Q 381,111 373,121" stroke="#2a2a2a" stroke-width="1.2" fill="none"/>
+        <text x="351" y="136" text-anchor="middle" font-size="6.5" fill="#444" font-family="monospace">BUZZER</text>
+
+        <!-- ======== GND symbol ======== -->
+        <line x1="54" y1="188" x2="70" y2="188" stroke="#333" stroke-width="1.5"/>
+        <line x1="57" y1="192" x2="67" y2="192" stroke="#333" stroke-width="1.2"/>
+        <line x1="60" y1="196" x2="64" y2="196" stroke="#333" stroke-width="1"/>
+
+        <!-- ======== CURRENT DIRECTION HINTS ======== -->
+        <text x="103" y="47" font-size="6" fill="#333" font-family="monospace">I →</text>
+        <text x="248" y="47" font-size="6" fill="#333" font-family="monospace">I →</text>
+        <text x="313" y="170" font-size="6" fill="#333" font-family="monospace">↓</text>
+        <text x="180" y="198" font-size="6" fill="#333" font-family="monospace">← I</text>
+      </svg>
+    </div>
+
+    <!-- Oscilloscope panel -->
+    <div class="panel">
+      <div class="panel-label">
+        <div class="led" id="led-osc"></div>
+        OSCILLOSCOPIO — PORTANTE MODULATA AM
+      </div>
+      <canvas id="osc"></canvas>
+      <div class="osc-meta">
+        <span>CH1 · 2V/DIV</span>
+        <span id="osc-status">STANDBY</span>
+        <span>T · 1ms/DIV</span>
+      </div>
+    </div>
+
+  </div><!-- /row-2 -->
+
+  <!-- Controls -->
+  <div class="panel ctrl-row">
+    <div class="panel-label" style="margin:0;width:100%">▸ PANNELLO DI CONTROLLO</div>
+    <input type="text" id="txt" placeholder="Inserisci testo da trasmettere..." maxlength="120"/>
+    <button class="btn" id="btn-tx" onclick="startTx()">▶ TRASMETTI</button>
+    <button class="btn stop" id="btn-stop" onclick="stopTx()" disabled>■ STOP</button>
+    <div class="speed-row">
+      VEL:
+      <input type="range" id="speed" min="1" max="5" value="3">
+      <span id="spd-val">3</span>
+    </div>
+  </div>
+
+  <!-- Morse signal display -->
+  <div class="panel">
+    <div class="panel-label">▸ SEGNALE MORSE IN USCITA</div>
+    <div id="morse-out">&nbsp;</div>
+  </div>
+
+  <!-- Log -->
+  <div class="panel">
+    <div class="panel-label">▸ LOG TRASMISSIONE</div>
+    <div id="log">—</div>
+  </div>
+
+  <!-- Morse table -->
+  <div class="panel">
+    <div class="panel-label">▸ TAVOLA CODICE MORSE</div>
+    <div class="table-grid" id="morse-table"></div>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+// ============================================================
+//  MORSE TABLE
+// ============================================================
+const MORSE = {
+  A:'.-',   B:'-...', C:'-.-.', D:'-..', E:'.',    F:'..-.',
+  G:'--.',  H:'....', I:'..',   J:'.---',K:'-.-',  L:'.-..',
+  M:'--',   N:'-.',   O:'---',  P:'.--.', Q:'--.-', R:'.-.',
+  S:'...',  T:'-',    U:'..-',  V:'...-', W:'.--',  X:'-..-',
+  Y:'-.--', Z:'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-',
+  '5':'.....','6':'-....','7':'--...','8':'---..','9':'----.',
+  '.':'.-.-.-', ',':'--..--', '?':'..--..', '/':'-..-.', '=':'-...-'
+};
+
+// Build reference table
+const tbl = document.getElementById('morse-table');
+Object.entries(MORSE).forEach(([k,v]) => {
+  const d = document.createElement('div');
+  d.className = 'table-cell';
+  d.innerHTML = `<span class="ch">${k}</span><span class="cod">${v}</span>`;
+  tbl.appendChild(d);
+});
+
+// ============================================================
+//  AUDIO ENGINE
+// ============================================================
+let actx = null, oscNode = null, gainNode = null;
+
+function initAudio() {
+  if (actx) return;
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  gainNode = actx.createGain();
+  gainNode.gain.value = 0;
+  oscNode = actx.createOscillator();
+  oscNode.type = 'sine';
+  oscNode.frequency.value = 700;
+  oscNode.connect(gainNode);
+  gainNode.connect(actx.destination);
+  oscNode.start();
+}
+
+function audioOn() {
+  if (!actx) return;
+  gainNode.gain.cancelScheduledValues(actx.currentTime);
+  gainNode.gain.setTargetAtTime(0.22, actx.currentTime, 0.004);
+}
+function audioOff() {
+  if (!actx) return;
+  gainNode.gain.cancelScheduledValues(actx.currentTime);
+  gainNode.gain.setTargetAtTime(0, actx.currentTime, 0.006);
+}
+
+// ============================================================
+//  OSCILLOSCOPE
+// ============================================================
+const canvas = document.getElementById('osc');
+const cx = canvas.getContext('2d');
+
+const VRATE     = 48000;   // virtual sample rate (for display only)
+const DISP_MS   = 12;      // milliseconds of signal shown
+const BUFSZ     = Math.round(VRATE * DISP_MS / 1000); // ≈576
+const CARRIER   = 700;     // Hz
+
+const sigBuf   = new Float32Array(BUFSZ);
+let   writePos  = 0;
+let   phi       = 0;
+let   keyDown   = false;
+let   lastRaf   = 0;
+
+function feedSamples(dtMs) {
+  const n    = Math.min(Math.round(VRATE * dtMs / 1000), BUFSZ);
+  const step = 2 * Math.PI * CARRIER / VRATE;
+  for (let i = 0; i < n; i++) {
+    let s;
+    if (keyDown) {
+      s = Math.sin(phi);
+      phi += step;
+      if (phi > 2 * Math.PI) phi -= 2 * Math.PI;
+    } else {
+      s = (Math.random() - 0.5) * 0.035; // noise floor
+      phi = 0;
+    }
+    sigBuf[writePos % BUFSZ] = s;
+    writePos++;
+  }
+}
+
+function drawOsc(ts) {
+  requestAnimationFrame(drawOsc);
+  const dt = Math.min(ts - lastRaf, 50);
+  lastRaf = ts;
+  feedSamples(dt);
+
+  if (canvas.width  !== canvas.offsetWidth ||
+      canvas.height !== (canvas.offsetHeight || 215)) {
+    canvas.width  = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight || 215;
+  }
+  const W = canvas.width, H = canvas.height;
+
+  // fade to black
+  cx.fillStyle = 'rgba(5,5,5,0.82)';
+  cx.fillRect(0, 0, W, H);
+
+  // scanlines
+  cx.fillStyle = 'rgba(0,0,0,0.06)';
+  for (let y = 0; y < H; y += 3) cx.fillRect(0, y, W, 1);
+
+  // grid
+  cx.strokeStyle = 'rgba(255,255,255,0.06)';
+  cx.lineWidth = 0.5;
+  for (let i = 0; i <= 10; i++) { const x = i*W/10; cx.beginPath(); cx.moveTo(x,0); cx.lineTo(x,H); cx.stroke(); }
+  for (let i = 0; i <= 4;  i++) { const y = i*H/4;  cx.beginPath(); cx.moveTo(0,y); cx.lineTo(W,y); cx.stroke(); }
+
+  // axis
+  cx.strokeStyle = 'rgba(255,255,255,0.18)';
+  cx.lineWidth = 0.8;
+  cx.beginPath(); cx.moveTo(0, H/2); cx.lineTo(W, H/2); cx.stroke();
+
+  // waveform — two passes (glow + sharp)
+  const amp = H * 0.37;
+  const start = writePos - BUFSZ;
+
+  function tracePath() {
+    cx.beginPath();
+    for (let px = 0; px < W; px++) {
+      const si  = Math.floor(px * BUFSZ / W);
+      const idx = ((start + si) % BUFSZ + BUFSZ) % BUFSZ;
+      const y   = H/2 - sigBuf[idx] * amp;
+      px === 0 ? cx.moveTo(px, y) : cx.lineTo(px, y);
+    }
+  }
+
+  // glow pass
+  cx.save();
+  cx.strokeStyle = 'rgba(255,255,255,0.18)';
+  cx.lineWidth   = 4;
+  cx.shadowBlur  = 0;
+  tracePath();
+  cx.stroke();
+  cx.restore();
+
+  // sharp pass
+  cx.strokeStyle = '#ffffff';
+  cx.lineWidth   = 1.6;
+  cx.shadowColor = '#ffffff';
+  cx.shadowBlur  = 7;
+  tracePath();
+  cx.stroke();
+  cx.shadowBlur = 0;
+}
+requestAnimationFrame(drawOsc);
+
+// ============================================================
+//  CIRCUIT ANIMATION
+// ============================================================
+const WIRE_IDS = ['w1','w2','w3','w4','w5','w6','w7','w8','w9'];
+
+function setKey(active) {
+  keyDown = active;
+  active ? audioOn() : audioOff();
+
+  // lever position
+  const lever = document.getElementById('key-lever');
+  const knob  = document.getElementById('key-knob');
+  const y2 = active ? 52 : 58;   // closed = flat on wire, open = lifted
+  lever.setAttribute('y2', y2);
+  knob.setAttribute('cy',  y2);
+  lever.style.stroke = active ? '#ffffff' : '#888';
+  lever.style.filter = active ? 'url(#cglow)' : '';
+  knob.style.fill    = active ? '#ffffff' : '#555';
+
+  // wires
+  WIRE_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) active ? el.classList.add('active') : el.classList.remove('active');
+  });
+
+  // coil
+  const coil = document.getElementById('coil');
+  coil.style.stroke = active ? '#ffffff' : '#333';
+  coil.style.filter = active ? 'url(#wglow)' : '';
+
+  // capacitor plates
+  ['cap1','cap2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.stroke = active ? '#ffffff' : '#333';
+  });
+
+  // speaker
+  document.getElementById('spk-body').style.stroke = active ? '#aaa' : '#333';
+  ['spk-f1','spk-f2','spk-f3'].forEach(id => {
+    document.getElementById(id).style.stroke = active ? '#888' : '#2a2a2a';
+  });
+  document.getElementById('sw1').style.stroke = active ? '#aaa' : '#2a2a2a';
+  document.getElementById('sw2').style.stroke = active ? '#777' : '#2a2a2a';
+
+  // LEDs
+  document.getElementById('led-circ').classList.toggle('on', active);
+  document.getElementById('led-osc').classList.toggle('on', active);
+
+  // status
+  const st = document.getElementById('osc-status');
+  if (active) {
+    st.textContent = 'TX ●';
+    st.className = 'tx';
+  } else {
+    st.textContent = transmitting ? 'PAUSA' : 'STANDBY';
+    st.className = '';
+  }
+}
+
+// ============================================================
+//  TRANSMISSION ENGINE
+// ============================================================
+let transmitting = false;
+let stopReq      = false;
+
+function unitMs() {
+  const v = parseInt(document.getElementById('speed').value);
+  return [170, 110, 72, 48, 30][v - 1];
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function encodeText(text) {
+  return [...text.toUpperCase()].map(c => {
+    if (c === ' ') return { ch: ' ', code: '/' };
+    const code = MORSE[c];
+    return code ? { ch: c, code } : null;
+  }).filter(Boolean);
+}
+
+function renderMorse(items, cur) {
+  document.getElementById('morse-out').innerHTML =
+    items.map(({ ch, code }, i) => {
+      const cls = i < cur ? 'mc-done' : i === cur ? 'mc-active' : 'mc-pending';
+      const txt = code === '/' ? '&nbsp;&nbsp;&nbsp;' : code;
+      return `<span class="${cls}" title="${ch}">${txt}&thinsp;</span>`;
+    }).join('');
+}
+
+async function playCode(code) {
+  const u = unitMs();
+  for (let i = 0; i < code.length; i++) {
+    if (stopReq) break;
+    setKey(true);
+    await sleep(code[i] === '.' ? u : u * 3);
+    setKey(false);
+    if (i < code.length - 1 && !stopReq) await sleep(u);
+  }
+}
+
+async function startTx() {
+  const raw = document.getElementById('txt').value.trim();
+  if (!raw || transmitting) return;
+
+  initAudio();
+  if (actx.state === 'suspended') actx.resume();
+
+  transmitting = true;
+  stopReq      = false;
+  document.getElementById('btn-tx').disabled   = true;
+  document.getElementById('btn-stop').disabled  = false;
+  document.getElementById('log').textContent    = '» TX: ' + raw.toUpperCase();
+
+  const items = encodeText(raw);
+  renderMorse(items, -1);
+
+  for (let i = 0; i < items.length && !stopReq; i++) {
+    const { ch, code } = items[i];
+    renderMorse(items, i);
+
+    if (code === '/') {
+      await sleep(unitMs() * 4);
+      continue;
+    }
+
+    await playCode(code);
+
+    if (i < items.length - 1 && !stopReq)
+      await sleep(unitMs() * 3); // inter-letter gap
+  }
+
+  setKey(false);
+  transmitting = false;
+  stopReq      = false;
+  document.getElementById('btn-tx').disabled   = false;
+  document.getElementById('btn-stop').disabled  = true;
+  document.getElementById('osc-status').textContent = 'STANDBY';
+  document.getElementById('osc-status').className   = '';
+  renderMorse(items, items.length);
+}
+
+function stopTx() {
+  stopReq = true;
+  setKey(false);
+}
+
+// ── UI helpers ──────────────────────────────────────────────
+document.getElementById('speed').addEventListener('input', function() {
+  document.getElementById('spd-val').textContent = this.value;
+});
+document.getElementById('txt').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startTx();
+});
+</script>
+</body>
+</html>
