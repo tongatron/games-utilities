@@ -62,4 +62,16 @@ Simulatore di dado con grafica monocromatica pixel-style e animazione al lancio.
 
 ---
 
+### 📡 Simulatore Morse — Circuiti Analogici
+Simulatore di telegrafia Morse con schema circuitale SVG animato (batteria, tasto telegrafico, bobina L, condensatore C, buzzer), oscilloscopio canvas con portante RF a 700 Hz modulata in ampiezza e audio via Web Audio API.
+
+🔗 [Demo](https://tongatron.github.io/games-utilities/morse/index.html)
+
+#### Versione dettagliata
+Schema circuitale completo con stadio oscillatore Colpitts (Q1 BF494), rivelatore d'inviluppo (D1 1N34), amplificatore AF (Q2 BC547), riquadri di stadio, etichette pin BJT, junction dots, tensioni di punto di lavoro e formula di risonanza.
+
+🔗 [Demo dettagliato](https://tongatron.github.io/games-utilities/morse/index2.html)
+
+---
+
 Made by [Tongatron](https://tongatron.github.io)
