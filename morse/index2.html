@@ -149,25 +149,29 @@
     input[type=text] {
       flex: 1;
       min-width: 200px;
-      background: #0b0b0b;
-      border: 1px solid var(--border);
+      background: #161616;
+      border: 1px solid rgba(255,255,255,.45);
       color: var(--hi);
-      padding: 9px 13px;
+      padding: 10px 14px;
       font-family: inherit;
       font-size: .85rem;
       outline: none;
       border-radius: 2px;
       text-transform: uppercase;
       letter-spacing: .05em;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
     }
-    input[type=text]:focus { border-color: #8a8a8a; }
-    input[type=text]::placeholder { color: #353535; text-transform: none; }
+    input[type=text]:focus {
+      border-color: rgba(255,255,255,.85);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.08);
+    }
+    input[type=text]::placeholder { color: #555; text-transform: none; }
 
     .btn {
-      background: #171717;
-      border: 1px solid #575757;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,.35);
       color: var(--hi);
-      padding: 9px 18px;
+      padding: 10px 20px;
       font-family: inherit;
       font-size: .72rem;
       letter-spacing: .15em;
@@ -176,11 +180,27 @@
       transition: background .08s, box-shadow .08s, border-color .08s;
     }
     .btn:hover:not(:disabled) {
-      background: rgba(255,255,255,.07);
-      box-shadow: 0 0 12px rgba(255,255,255,.10);
+      background: rgba(255,255,255,.10);
+      border-color: rgba(255,255,255,.65);
+      box-shadow: 0 0 14px rgba(255,255,255,.12);
     }
-    .btn:disabled { opacity: .35; cursor: default; }
-    .btn.stop { color: #b0b0b0; }
+    .btn:disabled { opacity: .32; cursor: default; }
+    .btn.stop {
+      color: #888;
+      border-color: rgba(255,255,255,.18);
+    }
+    /* primary action — inverted for max contrast */
+    #btn-tx {
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
+      font-weight: 600;
+    }
+    #btn-tx:hover:not(:disabled) {
+      background: #d8d8d8;
+      border-color: #d8d8d8;
+      box-shadow: 0 0 18px rgba(255,255,255,.25);
+    }
 
     .speed-row {
       display: flex;
@@ -278,6 +298,18 @@
   </header>
 
   <div class="content">
+    <div class="panel ctrl-row">
+      <div class="panel-label" style="margin:0; width:100%">▸ PANNELLO DI CONTROLLO</div>
+      <input type="text" id="txt" placeholder="Inserisci testo da trasmettere..." maxlength="120" />
+      <button class="btn" id="btn-tx" onclick="startTx()">▶ TRASMETTI</button>
+      <button class="btn stop" id="btn-stop" onclick="stopTx()" disabled>■ STOP</button>
+      <div class="speed-row">
+        VEL:
+        <input type="range" id="speed" min="1" max="5" value="3" />
+        <span id="spd-val">3</span>
+      </div>
+    </div>
+
     <div class="row-2">
       <div class="panel">
         <div class="panel-label">
@@ -584,18 +616,6 @@
           <span id="osc-status">STANDBY</span>
           <span>T · 1ms/DIV</span>
         </div>
-      </div>
-    </div>
-
-    <div class="panel ctrl-row">
-      <div class="panel-label" style="margin:0; width:100%">▸ PANNELLO DI CONTROLLO</div>
-      <input type="text" id="txt" placeholder="Inserisci testo da trasmettere..." maxlength="120" />
-      <button class="btn" id="btn-tx" onclick="startTx()">▶ TRASMETTI</button>
-      <button class="btn stop" id="btn-stop" onclick="stopTx()" disabled>■ STOP</button>
-      <div class="speed-row">
-        VEL:
-        <input type="range" id="speed" min="1" max="5" value="3" />
-        <span id="spd-val">3</span>
       </div>
     </div>
 
