@@ -62,8 +62,8 @@
     }
 
     .scene {
-      width: 180px;
-      height: 180px;
+      width: 100%;
+      min-height: 180px;
       perspective: 800px;
       display: grid;
       place-items: center;
@@ -72,13 +72,29 @@
       padding: 0;
     }
 
+    .dice-stage {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .scene[data-dice-count="1"] .dice-stage {
+      gap: 0;
+    }
+
+    .scene[data-dice-count="3"] .dice-stage {
+      gap: 12px;
+    }
+
     .shadow {
       display: none;
     }
 
     .cube {
-      width: var(--size);
-      height: var(--size);
+      width: var(--die-size, var(--size));
+      height: var(--die-size, var(--size));
       position: relative;
       transform-style: preserve-3d;
       transform: rotateX(-25deg) rotateY(35deg);
@@ -91,7 +107,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      padding: 12px;
+      padding: max(8px, calc(var(--die-size, var(--size)) * 0.12));
       background: #fff;
       border: 1px solid #000;
       box-shadow: 0 0 0 1px #fff;
@@ -99,8 +115,8 @@
     }
 
     .pip {
-      width: var(--pip);
-      height: var(--pip);
+      width: var(--die-pip, var(--pip));
+      height: var(--die-pip, var(--pip));
       align-self: center;
       justify-self: center;
       background: #000;
@@ -110,17 +126,31 @@
 
     .show { opacity: 1; }
 
-    .front  { transform: translateZ(calc(var(--size) / 2)); }
-    .back   { transform: rotateY(180deg) translateZ(calc(var(--size) / 2)); }
-    .right  { transform: rotateY(90deg) translateZ(calc(var(--size) / 2)); }
-    .left   { transform: rotateY(-90deg) translateZ(calc(var(--size) / 2)); }
-    .top    { transform: rotateX(90deg) translateZ(calc(var(--size) / 2)); }
-    .bottom { transform: rotateX(-90deg) translateZ(calc(var(--size) / 2)); }
+    .front  { transform: translateZ(calc(var(--die-size, var(--size)) / 2)); }
+    .back   { transform: rotateY(180deg) translateZ(calc(var(--die-size, var(--size)) / 2)); }
+    .right  { transform: rotateY(90deg) translateZ(calc(var(--die-size, var(--size)) / 2)); }
+    .left   { transform: rotateY(-90deg) translateZ(calc(var(--die-size, var(--size)) / 2)); }
+    .top    { transform: rotateX(90deg) translateZ(calc(var(--die-size, var(--size)) / 2)); }
+    .bottom { transform: rotateX(-90deg) translateZ(calc(var(--die-size, var(--size)) / 2)); }
 
     .controls {
       display: flex;
       justify-content: center;
       width: 100%;
+    }
+
+    .mode-controls {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-self: start;
+    }
+
+    .mode-btn.active {
+      background: #fff;
+      color: #000;
     }
 
     button, input {
@@ -179,6 +209,12 @@
       text-align: center;
     }
 
+    .range-note {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+
     .chart-wrap {
       display: grid;
       gap: 10px;
@@ -186,7 +222,7 @@
 
     .chart-row {
       display: grid;
-      grid-template-columns: 14px 1fr 26px;
+      grid-template-columns: 2ch 1fr minmax(32px, auto);
       align-items: center;
       gap: 8px;
     }
@@ -196,6 +232,7 @@
       font-weight: 400;
       font-size: 11px;
       color: #fff;
+      white-space: nowrap;
     }
 
     .chart-bar-box {
@@ -289,8 +326,11 @@
       }
 
       .scene {
-        width: 164px;
-        height: 164px;
+        min-height: 164px;
+      }
+
+      .dice-stage {
+        gap: 12px;
       }
 
       .actions-wrap {
@@ -310,40 +350,8 @@
       <h1 class="title">DADO</h1>
     </section>
 
-    <div class="scene" aria-label="Animazione dado">
-      <div class="shadow"></div>
-      <div class="cube" id="cube">
-        <div class="face front">
-          <span class="pip"></span><span class="pip"></span><span class="pip"></span>
-          <span class="pip"></span><span class="pip show"></span><span class="pip"></span>
-          <span class="pip"></span><span class="pip"></span><span class="pip"></span>
-        </div>
-        <div class="face back">
-          <span class="pip show"></span><span class="pip"></span><span class="pip show"></span>
-          <span class="pip show"></span><span class="pip"></span><span class="pip show"></span>
-          <span class="pip show"></span><span class="pip"></span><span class="pip show"></span>
-        </div>
-        <div class="face right">
-          <span class="pip"></span><span class="pip"></span><span class="pip show"></span>
-          <span class="pip"></span><span class="pip show"></span><span class="pip"></span>
-          <span class="pip show"></span><span class="pip"></span><span class="pip"></span>
-        </div>
-        <div class="face left">
-          <span class="pip show"></span><span class="pip"></span><span class="pip show"></span>
-          <span class="pip show"></span><span class="pip"></span><span class="pip show"></span>
-          <span class="pip"></span><span class="pip"></span><span class="pip"></span>
-        </div>
-        <div class="face top">
-          <span class="pip show"></span><span class="pip"></span><span class="pip show"></span>
-          <span class="pip"></span><span class="pip show"></span><span class="pip"></span>
-          <span class="pip show"></span><span class="pip"></span><span class="pip show"></span>
-        </div>
-        <div class="face bottom">
-          <span class="pip show"></span><span class="pip"></span><span class="pip"></span>
-          <span class="pip"></span><span class="pip"></span><span class="pip"></span>
-          <span class="pip"></span><span class="pip"></span><span class="pip show"></span>
-        </div>
-      </div>
+    <div class="scene" id="scene" aria-label="Animazione dado">
+      <div class="dice-stage" id="diceStage"></div>
     </div>
 
     <div class="controls">
@@ -351,16 +359,10 @@
     </div>
 
     <section class="stats">
-      <div class="panel-title">statistiche</div>
+      <div class="panel-title" id="statsTitle">statistiche facce</div>
+      <div class="range-note" id="rangeNote">facce possibili: 1-6</div>
 
-      <div class="chart-wrap" aria-label="Istogramma dei lanci">
-        <div class="chart-row"><span class="chart-label">1</span><div class="chart-bar-box"><div class="chart-bar" id="bar1"></div></div><span class="chart-value" id="count1">0</span></div>
-        <div class="chart-row"><span class="chart-label">2</span><div class="chart-bar-box"><div class="chart-bar" id="bar2"></div></div><span class="chart-value" id="count2">0</span></div>
-        <div class="chart-row"><span class="chart-label">3</span><div class="chart-bar-box"><div class="chart-bar" id="bar3"></div></div><span class="chart-value" id="count3">0</span></div>
-        <div class="chart-row"><span class="chart-label">4</span><div class="chart-bar-box"><div class="chart-bar" id="bar4"></div></div><span class="chart-value" id="count4">0</span></div>
-        <div class="chart-row"><span class="chart-label">5</span><div class="chart-bar-box"><div class="chart-bar" id="bar5"></div></div><span class="chart-value" id="count5">0</span></div>
-        <div class="chart-row"><span class="chart-label">6</span><div class="chart-bar-box"><div class="chart-bar" id="bar6"></div></div><span class="chart-value" id="count6">0</span></div>
-      </div>
+      <div class="chart-wrap" id="chartWrap" aria-label="Istogramma dei lanci"></div>
 
       <div class="metrics-wrap">
         <div class="total-wrap">
@@ -375,36 +377,30 @@
           </div>
           <button id="resetBtn" class="reset-small">Azzera</button>
         </div>
+
+        <div class="mode-controls" aria-label="Selezione numero dadi">
+          <button class="mode-btn active" data-dice-mode="1">1 dado</button>
+          <button class="mode-btn" data-dice-mode="2">2 dadi</button>
+          <button class="mode-btn" data-dice-mode="3">3 dadi</button>
+        </div>
       </div>
     </section>
   </main>
 
   <script>
-    const cube = document.getElementById('cube');
+    const scene = document.getElementById('scene');
+    const diceStage = document.getElementById('diceStage');
     const rollBtn = document.getElementById('rollBtn');
     const resetBtn = document.getElementById('resetBtn');
     const bulkBtn = document.getElementById('bulkBtn');
     const bulkCountEl = document.getElementById('bulkCount');
     const totalEl = document.getElementById('totalCount');
+    const statsTitle = document.getElementById('statsTitle');
+    const rangeNote = document.getElementById('rangeNote');
+    const chartWrap = document.getElementById('chartWrap');
+    const modeBtns = [...document.querySelectorAll('[data-dice-mode]')];
 
-    const countEls = {
-      1: document.getElementById('count1'),
-      2: document.getElementById('count2'),
-      3: document.getElementById('count3'),
-      4: document.getElementById('count4'),
-      5: document.getElementById('count5'),
-      6: document.getElementById('count6')
-    };
-
-    const barEls = {
-      1: document.getElementById('bar1'),
-      2: document.getElementById('bar2'),
-      3: document.getElementById('bar3'),
-      4: document.getElementById('bar4'),
-      5: document.getElementById('bar5'),
-      6: document.getElementById('bar6')
-    };
-
+    const storageKey = 'dice-state-v2';
     const baseOrientations = {
       1: { x: 0, y: 0 },
       2: { x: 90, y: 0 },
@@ -413,103 +409,325 @@
       5: { x: -90, y: 0 },
       6: { x: 0, y: 180 }
     };
+    const faceLayouts = {
+      1: [4],
+      2: [0, 8],
+      3: [2, 4, 6],
+      4: [0, 2, 3, 5],
+      5: [0, 2, 4, 6, 8],
+      6: [0, 2, 3, 5, 6, 8]
+    };
+    const faceMap = [
+      ['front', 1],
+      ['back', 6],
+      ['right', 3],
+      ['left', 4],
+      ['top', 5],
+      ['bottom', 2]
+    ];
+    const sizePresets = {
+      1: { size: 96, pip: 10 },
+      2: { size: 76, pip: 8 },
+      3: { size: 64, pip: 7 }
+    };
 
-    let history = JSON.parse(localStorage.getItem('dice-history') || '[]');
+    const state = loadState();
+    let currentMode = state.selectedMode;
+    let countEls = {};
+    let barEls = {};
     let rolling = false;
-    let currentX = -25;
-    let currentY = 35;
+    let diceEls = [];
+    let currentRotations = [];
+    let rollTimeoutId = null;
 
     function randomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    function applyTransform(x, y) {
-      cube.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+    function sanitizeHistory(entries, min, max) {
+      if (!Array.isArray(entries)) return [];
+
+      return entries.filter((value) => Number.isInteger(value) && value >= min && value <= max);
+    }
+
+    function loadState() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
+
+        if (stored && typeof stored === 'object') {
+          const histories = stored.histories && typeof stored.histories === 'object' ? stored.histories : {};
+
+          return {
+            selectedMode: [1, 2, 3].includes(Number(stored.selectedMode)) ? Number(stored.selectedMode) : 1,
+            histories: {
+              1: sanitizeHistory(histories[1], 1, 6),
+              2: sanitizeHistory(histories[2], 2, 12),
+              3: sanitizeHistory(histories[3], 3, 18)
+            }
+          };
+        }
+      } catch (error) {}
+
+      let legacyHistory = [];
+      try {
+        legacyHistory = sanitizeHistory(JSON.parse(localStorage.getItem('dice-history') || '[]'), 1, 6);
+      } catch (error) {}
+
+      return {
+        selectedMode: 1,
+        histories: {
+          1: legacyHistory,
+          2: [],
+          3: []
+        }
+      };
+    }
+
+    function saveState() {
+      state.selectedMode = currentMode;
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      localStorage.removeItem('dice-history');
+    }
+
+    function getHistory(mode = currentMode) {
+      if (!Array.isArray(state.histories[mode])) {
+        state.histories[mode] = [];
+      }
+
+      return state.histories[mode];
+    }
+
+    function getOutcomeRange(mode = currentMode) {
+      return {
+        min: mode,
+        max: mode * 6
+      };
+    }
+
+    function createFaceMarkup(faceClass, value) {
+      const visiblePips = faceLayouts[value];
+      const pips = Array.from({ length: 9 }, (_, index) => {
+        const showClass = visiblePips.includes(index) ? ' show' : '';
+        return `<span class="pip${showClass}"></span>`;
+      }).join('');
+
+      return `<div class="face ${faceClass}">${pips}</div>`;
+    }
+
+    function createCubeMarkup(index) {
+      const preset = sizePresets[currentMode];
+      const faces = faceMap
+        .map(([faceClass, value]) => createFaceMarkup(faceClass, value))
+        .join('');
+
+      return `<div class="cube" data-die-index="${index}" style="--die-size:${preset.size}px;--die-pip:${preset.pip}px;">${faces}</div>`;
+    }
+
+    function applyTransform(cubeEl, x, y) {
+      cubeEl.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+    }
+
+    function renderDice() {
+      scene.dataset.diceCount = String(currentMode);
+      diceStage.innerHTML = Array.from({ length: currentMode }, (_, index) => createCubeMarkup(index)).join('');
+      diceEls = [...diceStage.querySelectorAll('.cube')];
+      currentRotations = Array.from({ length: diceEls.length }, () => ({ x: -25, y: 35 }));
+
+      diceEls.forEach((cubeEl, index) => {
+        cubeEl.style.transition = 'none';
+        applyTransform(cubeEl, currentRotations[index].x, currentRotations[index].y);
+      });
+    }
+
+    function renderChart() {
+      const { min, max } = getOutcomeRange();
+      countEls = {};
+      barEls = {};
+
+      const rows = [];
+      for (let value = min; value <= max; value++) {
+        rows.push(
+          `<div class="chart-row">` +
+            `<span class="chart-label">${value}</span>` +
+            `<div class="chart-bar-box"><div class="chart-bar" id="bar${value}"></div></div>` +
+            `<span class="chart-value" id="count${value}">0</span>` +
+          `</div>`
+        );
+      }
+
+      chartWrap.innerHTML = rows.join('');
+
+      for (let value = min; value <= max; value++) {
+        countEls[value] = document.getElementById(`count${value}`);
+        barEls[value] = document.getElementById(`bar${value}`);
+      }
     }
 
     function updateStats() {
-      const counts = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0 };
-      history.forEach(n => { if (counts[n] !== undefined) counts[n]++; });
-      const maxCount = Math.max(1, ...Object.values(counts));
+      const { min, max } = getOutcomeRange();
+      const history = getHistory();
+      const counts = {};
 
-      for (let i = 1; i <= 6; i++) {
-        countEls[i].textContent = counts[i];
-        barEls[i].style.width = `${(counts[i] / maxCount) * 100}%`;
+      renderChart();
+
+      for (let value = min; value <= max; value++) {
+        counts[value] = 0;
       }
 
+      history.forEach((value) => {
+        if (counts[value] !== undefined) {
+          counts[value] += 1;
+        }
+      });
+
+      const maxCount = Math.max(1, ...Object.values(counts));
+
+      for (let value = min; value <= max; value++) {
+        countEls[value].textContent = counts[value];
+        barEls[value].style.width = `${(counts[value] / maxCount) * 100}%`;
+      }
+
+      statsTitle.textContent = currentMode === 1 ? 'statistiche facce' : 'statistiche somme';
+      rangeNote.textContent = currentMode === 1 ? 'facce possibili: 1-6' : `somme possibili: ${min}-${max}`;
+      chartWrap.setAttribute(
+        'aria-label',
+        currentMode === 1 ? 'Istogramma dei lanci' : `Istogramma delle somme di ${currentMode} dadi`
+      );
       totalEl.textContent = history.length;
+      rollBtn.textContent = currentMode === 1 ? 'Lancia il dado' : `Lancia ${currentMode} dadi`;
+    }
+
+    function setControlsDisabled(disabled) {
+      rollBtn.disabled = disabled;
+      resetBtn.disabled = disabled;
+      bulkBtn.disabled = disabled;
+      bulkCountEl.disabled = disabled;
+      modeBtns.forEach((btn) => {
+        btn.disabled = disabled;
+      });
+    }
+
+    function getRollResults() {
+      return Array.from({ length: currentMode }, () => randomInt(1, 6));
+    }
+
+    function sumResults(results) {
+      return results.reduce((sum, value) => sum + value, 0);
+    }
+
+    function setDiceFaces(results) {
+      results.forEach((result, index) => {
+        const cubeEl = diceEls[index];
+        if (!cubeEl) return;
+
+        const base = baseOrientations[result];
+        cubeEl.style.transition = 'none';
+        applyTransform(cubeEl, base.x, base.y);
+        currentRotations[index] = { x: base.x, y: base.y };
+      });
+    }
+
+    function recordResults(results) {
+      getHistory().push(sumResults(results));
+      saveState();
+      updateStats();
+    }
+
+    function finishRoll(results) {
+      clearTimeout(rollTimeoutId);
+      setDiceFaces(results);
+      recordResults(results);
+
+      requestAnimationFrame(() => {
+        setControlsDisabled(false);
+        rolling = false;
+      });
+    }
+
+    function switchMode(nextMode) {
+      if (rolling || nextMode === currentMode) return;
+
+      currentMode = nextMode;
+      modeBtns.forEach((btn) => {
+        btn.classList.toggle('active', Number(btn.dataset.diceMode) === currentMode);
+      });
+
+      saveState();
+      renderDice();
+      updateStats();
     }
 
     function rollDice() {
       if (rolling) return;
+
       rolling = true;
-      rollBtn.disabled = true;
-      resetBtn.disabled = true;
-      bulkBtn.disabled = true;
+      setControlsDisabled(true);
 
-      const result = randomInt(1, 6);
-      const base = baseOrientations[result];
-      const spinsX = randomInt(4, 6) * 360;
-      const spinsY = randomInt(4, 6) * 360;
+      const results = getRollResults();
+      clearTimeout(rollTimeoutId);
 
-      currentX = base.x + spinsX;
-      currentY = base.y + spinsY;
+      results.forEach((result, index) => {
+        const cubeEl = diceEls[index];
+        const base = baseOrientations[result];
+        const spinsX = randomInt(4, 6) * 360;
+        const spinsY = randomInt(4, 6) * 360;
+        const targetX = base.x + spinsX;
+        const targetY = base.y + spinsY;
 
-      cube.style.transition = 'transform 1.05s cubic-bezier(0.22, 0.78, 0.18, 1)';
-      applyTransform(currentX, currentY);
+        cubeEl.style.transition = 'transform 1.05s cubic-bezier(0.22, 0.78, 0.18, 1)';
+        applyTransform(cubeEl, targetX, targetY);
+        currentRotations[index] = { x: targetX, y: targetY };
+      });
 
-      const onDone = () => {
-        cube.removeEventListener('transitionend', onDone);
-        cube.style.transition = 'none';
-        applyTransform(base.x, base.y);
-
-        history.push(result);
-        localStorage.setItem('dice-history', JSON.stringify(history));
-        updateStats();
-
-        requestAnimationFrame(() => {
-          rollBtn.disabled = false;
-          resetBtn.disabled = false;
-          bulkBtn.disabled = false;
-          rolling = false;
-          currentX = base.x;
-          currentY = base.y;
-        });
-      };
-
-      cube.addEventListener('transitionend', onDone, { once: true });
-
-      setTimeout(() => {
-        if (!rolling) return;
-        onDone();
-      }, 1200);
+      rollTimeoutId = setTimeout(() => finishRoll(results), 1150);
     }
 
     rollBtn.addEventListener('click', rollDice);
 
+    modeBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        switchMode(Number(btn.dataset.diceMode));
+      });
+    });
+
     bulkBtn.addEventListener('click', () => {
       if (rolling) return;
 
-      const n = Math.max(1, Math.floor(Number(bulkCountEl.value) || 0));
-      if (!Number.isFinite(n) || n < 1) return;
+      const n = Math.max(1, Math.floor(Number(bulkCountEl.value) || 1));
+      const history = getHistory();
+      let lastResults = null;
+
+      bulkCountEl.value = String(n);
 
       for (let i = 0; i < n; i++) {
-        history.push(randomInt(1, 6));
+        lastResults = getRollResults();
+        history.push(sumResults(lastResults));
       }
 
-      localStorage.setItem('dice-history', JSON.stringify(history));
+      if (lastResults) {
+        setDiceFaces(lastResults);
+      }
+
+      saveState();
       updateStats();
     });
 
     resetBtn.addEventListener('click', () => {
       if (rolling) return;
-      history = [];
-      localStorage.removeItem('dice-history');
+
+      state.histories[currentMode] = [];
+      saveState();
+      renderDice();
       updateStats();
     });
 
-    applyTransform(currentX, currentY);
+    modeBtns.forEach((btn) => {
+      btn.classList.toggle('active', Number(btn.dataset.diceMode) === currentMode);
+    });
+
+    renderDice();
     updateStats();
+    saveState();
   </script>
 </body>
 </html>
