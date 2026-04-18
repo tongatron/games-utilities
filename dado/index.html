@@ -88,6 +88,13 @@
       gap: 12px;
     }
 
+    .scene[data-dice-count="4"] .dice-stage,
+    .scene[data-dice-count="5"] .dice-stage {
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
     .shadow {
       display: none;
     }
@@ -360,7 +367,6 @@
 
     <section class="stats">
       <div class="panel-title" id="statsTitle">statistiche facce</div>
-      <div class="range-note" id="rangeNote">facce possibili: 1-6</div>
 
       <div class="chart-wrap" id="chartWrap" aria-label="Istogramma dei lanci"></div>
 
@@ -382,6 +388,8 @@
           <button class="mode-btn active" data-dice-mode="1">1 dado</button>
           <button class="mode-btn" data-dice-mode="2">2 dadi</button>
           <button class="mode-btn" data-dice-mode="3">3 dadi</button>
+          <button class="mode-btn" data-dice-mode="4">4 dadi</button>
+          <button class="mode-btn" data-dice-mode="5">5 dadi</button>
         </div>
       </div>
     </section>
@@ -396,7 +404,6 @@
     const bulkCountEl = document.getElementById('bulkCount');
     const totalEl = document.getElementById('totalCount');
     const statsTitle = document.getElementById('statsTitle');
-    const rangeNote = document.getElementById('rangeNote');
     const chartWrap = document.getElementById('chartWrap');
     const modeBtns = [...document.querySelectorAll('[data-dice-mode]')];
 
@@ -413,7 +420,7 @@
       1: [4],
       2: [0, 8],
       3: [2, 4, 6],
-      4: [0, 2, 3, 5],
+      4: [0, 2, 6, 8],
       5: [0, 2, 4, 6, 8],
       6: [0, 2, 3, 5, 6, 8]
     };
@@ -428,7 +435,9 @@
     const sizePresets = {
       1: { size: 96, pip: 10 },
       2: { size: 76, pip: 8 },
-      3: { size: 64, pip: 7 }
+      3: { size: 64, pip: 7 },
+      4: { size: 56, pip: 6 },
+      5: { size: 50, pip: 5 }
     };
 
     const state = loadState();
@@ -458,11 +467,13 @@
           const histories = stored.histories && typeof stored.histories === 'object' ? stored.histories : {};
 
           return {
-            selectedMode: [1, 2, 3].includes(Number(stored.selectedMode)) ? Number(stored.selectedMode) : 1,
+            selectedMode: [1, 2, 3, 4, 5].includes(Number(stored.selectedMode)) ? Number(stored.selectedMode) : 1,
             histories: {
               1: sanitizeHistory(histories[1], 1, 6),
               2: sanitizeHistory(histories[2], 2, 12),
-              3: sanitizeHistory(histories[3], 3, 18)
+              3: sanitizeHistory(histories[3], 3, 18),
+              4: sanitizeHistory(histories[4], 4, 24),
+              5: sanitizeHistory(histories[5], 5, 30)
             }
           };
         }
@@ -478,7 +489,9 @@
         histories: {
           1: legacyHistory,
           2: [],
-          3: []
+          3: [],
+          4: [],
+          5: []
         }
       };
     }
@@ -588,7 +601,6 @@
       }
 
       statsTitle.textContent = currentMode === 1 ? 'statistiche facce' : 'statistiche somme';
-      rangeNote.textContent = currentMode === 1 ? 'facce possibili: 1-6' : `somme possibili: ${min}-${max}`;
       chartWrap.setAttribute(
         'aria-label',
         currentMode === 1 ? 'Istogramma dei lanci' : `Istogramma delle somme di ${currentMode} dadi`

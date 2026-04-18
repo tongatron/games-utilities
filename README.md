@@ -55,4 +55,11 @@ Simulazione web della board open source MULTI sviluppata per tradurre in browser
 
 ---
 
+### 🎲 Dado Retro Punk
+Simulatore di dado in stile retro punk, con grafica monocromatica pixel-style e animazione al lancio. Supporta più modalità di dado e layout ottimizzato per mobile.
+
+🔗 [Demo](https://tongatron.github.io/games-utilities/dado/index.html)
+
+---
+
 Made by [Tongatron](https://tongatron.github.io)
