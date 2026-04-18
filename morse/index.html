@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulatore Morse — Stadio Analogico Avanzato</title>
+  <title>Simulatore Morse — Schema Circuitale Dettagliato</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -100,7 +100,7 @@
       transform: scale(1.1);
     }
 
-    #circuit-svg { display:block; width:100%; height:300px; }
+    #circuit-svg { display:block; width:100%; height:345px; }
     .wire {
       stroke: var(--line);
       stroke-width: 2;
@@ -149,25 +149,29 @@
     input[type=text] {
       flex: 1;
       min-width: 200px;
-      background: #0b0b0b;
-      border: 1px solid var(--border);
+      background: #161616;
+      border: 1px solid rgba(255,255,255,.45);
       color: var(--hi);
-      padding: 9px 13px;
+      padding: 10px 14px;
       font-family: inherit;
       font-size: .85rem;
       outline: none;
       border-radius: 2px;
       text-transform: uppercase;
       letter-spacing: .05em;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
     }
-    input[type=text]:focus { border-color: #8a8a8a; }
-    input[type=text]::placeholder { color: #353535; text-transform: none; }
+    input[type=text]:focus {
+      border-color: rgba(255,255,255,.85);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.08);
+    }
+    input[type=text]::placeholder { color: #555; text-transform: none; }
 
     .btn {
-      background: #171717;
-      border: 1px solid #575757;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,.35);
       color: var(--hi);
-      padding: 9px 18px;
+      padding: 10px 20px;
       font-family: inherit;
       font-size: .72rem;
       letter-spacing: .15em;
@@ -176,11 +180,27 @@
       transition: background .08s, box-shadow .08s, border-color .08s;
     }
     .btn:hover:not(:disabled) {
-      background: rgba(255,255,255,.07);
-      box-shadow: 0 0 12px rgba(255,255,255,.10);
+      background: rgba(255,255,255,.10);
+      border-color: rgba(255,255,255,.65);
+      box-shadow: 0 0 14px rgba(255,255,255,.12);
     }
-    .btn:disabled { opacity: .35; cursor: default; }
-    .btn.stop { color: #b0b0b0; }
+    .btn:disabled { opacity: .32; cursor: default; }
+    .btn.stop {
+      color: #888;
+      border-color: rgba(255,255,255,.18);
+    }
+    /* primary action — inverted for max contrast */
+    #btn-tx {
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
+      font-weight: 600;
+    }
+    #btn-tx:hover:not(:disabled) {
+      background: #d8d8d8;
+      border-color: #d8d8d8;
+      box-shadow: 0 0 18px rgba(255,255,255,.25);
+    }
 
     .speed-row {
       display: flex;
@@ -274,10 +294,22 @@
 <body>
   <header>
     <h1>SIMULATORE MORSE</h1>
-    <span class="sub">STADIO ANALOGICO REALISTICO — COLPITTS · RIVELATORE D’INVILUPPO · AMPLIFICATORE AF</span>
+    <span class="sub">SCHEMA DETTAGLIATO — COLPITTS · BIAS BJT · JUNCTION DOTS · OPERATING POINT · GROUND BUS</span>
   </header>
 
   <div class="content">
+    <div class="panel ctrl-row">
+      <div class="panel-label" style="margin:0; width:100%">▸ PANNELLO DI CONTROLLO</div>
+      <input type="text" id="txt" placeholder="Inserisci testo da trasmettere..." maxlength="120" />
+      <button class="btn" id="btn-tx" onclick="startTx()">▶ TRASMETTI</button>
+      <button class="btn stop" id="btn-stop" onclick="stopTx()" disabled>■ STOP</button>
+      <div class="speed-row">
+        VEL:
+        <input type="range" id="speed" min="1" max="5" value="3" />
+        <span id="spd-val">3</span>
+      </div>
+    </div>
+
     <div class="row-2">
       <div class="panel">
         <div class="panel-label">
@@ -285,7 +317,7 @@
           SCHEMA CIRCUITALE — COLPITTS / DETECTOR / AF AMP
         </div>
 
-        <svg id="circuit-svg" viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" aria-label="Schema analogico Morse realistico">
+        <svg id="circuit-svg" viewBox="0 0 820 355" xmlns="http://www.w3.org/2000/svg" aria-label="Schema analogico Morse realistico dettagliato">
           <defs>
             <filter id="wireGlow" x="-60%" y="-60%" width="220%" height="220%">
               <feGaussianBlur stdDeviation="2.2" result="blur"/>
@@ -454,13 +486,120 @@
             <line x1="54" y1="266" x2="62" y2="266" class="comp" stroke-width="1"/>
           </g>
 
-          <!-- annotations -->
+          <!-- annotations originali -->
           <text x="220" y="43" class="lbl">SUPPLY KEYING</text>
           <text x="396" y="66" class="lbl">COLLETTORE</text>
           <text x="352" y="198" class="lbl">EMITTER</text>
           <text x="595" y="119" class="lbl">OOK → DET</text>
           <text x="686" y="139" class="lbl">ENV → AF</text>
-          <text x="118" y="280" class="lbl">MASSA COMUNE</text>
+          <text x="118" y="272" class="lbl">MASSA COMUNE</text>
+
+          <!-- ═══════════════════════════════════════════
+               DETTAGLI AGGIUNTIVI
+          ═══════════════════════════════════════════ -->
+
+          <!-- FRAME BORDER -->
+          <rect x="3" y="3" width="814" height="348" rx="3"
+                fill="none" stroke="#191919" stroke-width="1.8"/>
+          <rect x="7" y="7" width="806" height="340" rx="2"
+                fill="none" stroke="#111" stroke-width="0.7"/>
+
+          <!-- STAGE BOUNDARY BOXES (dashed) -->
+          <rect x="184" y="36" width="364" height="228" rx="3"
+                fill="none" stroke="#1e1e1e" stroke-width="1.2" stroke-dasharray="7 4"/>
+          <text x="188" y="50" class="lbl" style="fill:#2b2b2b;font-size:6.5px;letter-spacing:.18em">STADIO OSCILLATORE COLPITTS</text>
+
+          <rect x="578" y="62" width="108" height="200" rx="3"
+                fill="none" stroke="#1e1e1e" stroke-width="1.2" stroke-dasharray="7 4"/>
+          <text x="582" y="75" class="lbl" style="fill:#2b2b2b;font-size:6.5px">RIVELATORE INVILUPPO</text>
+
+          <rect x="683" y="36" width="120" height="228" rx="3"
+                fill="none" stroke="#1e1e1e" stroke-width="1.2" stroke-dasharray="7 4"/>
+          <text x="687" y="50" class="lbl" style="fill:#2b2b2b;font-size:6.5px">AMPLIF. AF</text>
+
+          <!-- BJT PIN LABELS — Q1 (344,132) -->
+          <text x="356" y="105" class="lbl" style="fill:#363636;font-size:6px">C</text>
+          <text x="308"  y="129" class="lbl" style="fill:#363636;font-size:6px">B</text>
+          <text x="356" y="167" class="lbl" style="fill:#363636;font-size:6px">E</text>
+          <!-- small NPN arrow marker -->
+          <text x="326" y="149" class="lbl" style="fill:#2a2a2a;font-size:5.5px">NPN</text>
+
+          <!-- BJT PIN LABELS — Q2 (706,170) -->
+          <text x="716" y="148" class="lbl" style="fill:#363636;font-size:6px">C</text>
+          <text x="667" y="153" class="lbl" style="fill:#363636;font-size:6px">B</text>
+          <text x="716" y="196" class="lbl" style="fill:#363636;font-size:6px">E</text>
+          <text x="690" y="175" class="lbl" style="fill:#2a2a2a;font-size:5.5px">NPN</text>
+
+          <!-- JUNCTION DOTS at T-intersections -->
+          <circle cx="288" cy="52"  r="3.8" fill="#303030"/>  <!-- bias → VCC -->
+          <circle cx="420" cy="52"  r="3.8" fill="#303030"/>  <!-- tank → VCC -->
+          <circle cx="484" cy="116" r="3.8" fill="#303030"/>  <!-- feedback tap -->
+          <circle cx="640" cy="98"  r="3.8" fill="#303030"/>  <!-- detector node -->
+          <circle cx="674" cy="145" r="3.8" fill="#303030"/>  <!-- ENV → AF -->
+
+          <!-- BYPASS DECOUPLING CAP C6 (230, VCC→GND) -->
+          <path d="M 230 52 V 104" class="comp"/>
+          <line x1="220" y1="104" x2="240" y2="104" class="comp" stroke-width="2.6"/>
+          <line x1="220" y1="116" x2="240" y2="116" class="comp" stroke-width="2.6"/>
+          <path d="M 230 116 V 256" class="comp"/>
+          <circle cx="230" cy="52"  r="3.8" fill="#303030"/>
+          <circle cx="230" cy="256" r="3.8" fill="#303030"/>
+          <text x="244" y="108" class="lbl">C6</text>
+          <text x="244" y="118" class="lbl">100n</text>
+          <text x="244" y="128" class="lbl" style="fill:#222">DECOUPLING</text>
+
+          <!-- NODE OPERATING-POINT VOLTAGES -->
+          <text x="356" y="77"  class="lbl" style="fill:#252525">Vc≈5.2V</text>
+          <text x="356" y="202" class="lbl" style="fill:#252525">Ve≈0.8V</text>
+          <text x="243" y="126" class="lbl" style="fill:#252525">Vb≈1.4V</text>
+          <text x="648" y="92"  class="lbl" style="fill:#252525">Vdet</text>
+          <text x="714" y="112" class="lbl" style="fill:#252525">Vc≈5V</text>
+          <text x="674" y="135" class="lbl" style="fill:#252525">Venv</text>
+
+          <!-- SIGNAL FLOW CHEVRONS -->
+          <!-- OOK sul rail di alimentazione -->
+          <polygon points="196,46 210,42 210,38 224,44 210,50 210,46" fill="#252525"/>
+          <!-- RF verso rivelatore -->
+          <polygon points="554,95 568,91 568,87 582,93 568,99 568,95" fill="#252525"/>
+          <!-- ENV verso stadio AF -->
+          <polygon points="651,141 662,137 662,133 673,139 662,145 662,141" fill="#252525"/>
+
+          <!-- SIGNAL LABELS alongside chevrons -->
+          <text x="197" y="58" class="lbl" style="fill:#2e2e2e;font-size:6px">BIAS OOK</text>
+          <text x="555" y="83" class="lbl" style="fill:#2e2e2e;font-size:6px">RF 700Hz</text>
+          <text x="654" y="131" class="lbl" style="fill:#2e2e2e;font-size:6px">ENV</text>
+
+          <!-- COLPITTS RESONANCE FORMULA -->
+          <text x="420" y="222" text-anchor="middle" class="lbl" style="fill:#272727;font-size:6.8px">f₀ = 1 / (2π · √(L · C₁‖C₂))</text>
+          <text x="420" y="233" text-anchor="middle" class="lbl" style="fill:#1e1e1e;font-size:6px">L=1.8mH · C₁‖C₂=9.4nF → f₀ ≈ 700 Hz</text>
+
+          <!-- GROUND BUS LINE + LABEL -->
+          <path d="M 88 256 H 720" stroke="#1c1c1c" stroke-width="1.3" fill="none"/>
+          <text x="400" y="270" text-anchor="middle" class="lbl" style="fill:#222;font-size:6.5px;letter-spacing:.14em">GROUND BUS — 0V</text>
+          <!-- extra GND junction dots -->
+          <circle cx="344" cy="256" r="3.8" fill="#2c2c2c"/>
+          <circle cx="484" cy="256" r="3.8" fill="#2c2c2c"/>
+          <circle cx="640" cy="256" r="3.8" fill="#2c2c2c"/>
+          <circle cx="706" cy="256" r="3.8" fill="#2c2c2c"/>
+
+          <!-- TITLE BLOCK (bottom-right) -->
+          <rect x="536" y="282" width="272" height="60" rx="2"
+                stroke="#1e1e1e" stroke-width="1" fill="#0b0b0b"/>
+          <line x1="536" y1="296" x2="808" y2="296" stroke="#1e1e1e" stroke-width="0.8"/>
+          <line x1="672" y1="296" x2="672" y2="342" stroke="#1e1e1e" stroke-width="0.8"/>
+          <text x="540" y="292" class="lbl" style="font-size:7px;fill:#3c3c3c;letter-spacing:.14em">TELEGRAFO MORSE — STADIO RF ANALOGICO</text>
+          <text x="540" y="308" class="lbl">KEY(BIAS) → Q1 COLPITTS → C3 → D1/RC → Q2 AF → SP1</text>
+          <text x="540" y="318" class="lbl">B1=9V DC · f₀=700Hz · Q1: BF494 · Q2: BC547</text>
+          <text x="540" y="328" class="lbl">D1=1N34 Ge · C6=100nF BYPASS · SCHEMA FUNZIONALE</text>
+          <text x="676" y="308" class="lbl" style="fill:#3c3c3c;font-size:7px">REV. B</text>
+          <text x="676" y="320" class="lbl">DETTAGLIO</text>
+          <text x="676" y="330" class="lbl">COMPLETO</text>
+
+          <!-- COMPONENT OUTLINE LABELS (missing from original) -->
+          <text x="522" y="198" class="lbl" style="fill:#222">FB NODE</text>
+          <text x="530" y="188" class="lbl" style="fill:#1e1e1e">↑ FEEDBACK</text>
+          <text x="462" y="80"  class="lbl" style="fill:#252525">C₁ 4n7</text>
+          <text x="462" y="152" class="lbl" style="fill:#252525">C₂ 4n7</text>
         </svg>
       </div>
 
@@ -477,18 +616,6 @@
           <span id="osc-status">STANDBY</span>
           <span>T · 1ms/DIV</span>
         </div>
-      </div>
-    </div>
-
-    <div class="panel ctrl-row">
-      <div class="panel-label" style="margin:0; width:100%">▸ PANNELLO DI CONTROLLO</div>
-      <input type="text" id="txt" placeholder="Inserisci testo da trasmettere..." maxlength="120" />
-      <button class="btn" id="btn-tx" onclick="startTx()">▶ TRASMETTI</button>
-      <button class="btn stop" id="btn-stop" onclick="stopTx()" disabled>■ STOP</button>
-      <div class="speed-row">
-        VEL:
-        <input type="range" id="speed" min="1" max="5" value="3" />
-        <span id="spd-val">3</span>
       </div>
     </div>
 
