@@ -24,7 +24,7 @@
       min-height: 100%;
       background: var(--bg);
       color: var(--fg);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: "Courier New", "IBM Plex Mono", "Liberation Mono", monospace;
     }
 
     body {
@@ -125,6 +125,7 @@
 
     button, input {
       font-family: inherit;
+      letter-spacing: 1px;
     }
 
     button {
@@ -267,6 +268,7 @@
       font-size: 11px;
       min-width: 0;
       outline: none;
+      text-align: center;
     }
 
     .reset-small,
@@ -300,14 +302,12 @@
         grid-template-columns: 68px 1fr;
       }
     }
-
   </style>
 </head>
 <body>
   <main class="wrap">
     <section class="titlebox" aria-label="Titolo interfaccia">
       <h1 class="title">DADO</h1>
-      
     </section>
 
     <div class="scene" aria-label="Animazione dado">
@@ -377,7 +377,7 @@
         </div>
       </div>
     </section>
-</main>
+  </main>
 
   <script>
     const cube = document.getElementById('cube');
@@ -449,13 +449,13 @@
 
       const result = randomInt(1, 6);
       const base = baseOrientations[result];
-      const spinsX = randomInt(4, 7) * 360;
-      const spinsY = randomInt(4, 7) * 360;
+      const spinsX = randomInt(4, 6) * 360;
+      const spinsY = randomInt(4, 6) * 360;
 
       currentX = base.x + spinsX;
       currentY = base.y + spinsY;
 
-      cube.style.transition = 'transform 1.15s steps(28)';
+      cube.style.transition = 'transform 1.05s cubic-bezier(0.22, 0.78, 0.18, 1)';
       applyTransform(currentX, currentY);
 
       const onDone = () => {
@@ -482,7 +482,7 @@
       setTimeout(() => {
         if (!rolling) return;
         onDone();
-      }, 1300);
+      }, 1200);
     }
 
     rollBtn.addEventListener('click', rollDice);
