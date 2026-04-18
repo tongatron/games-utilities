@@ -3,58 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dado</title>
+  <title>Dado // Retro Punk</title>
   <style>
     :root {
-      --bg1: #1d1d28;
-      --bg2: #111118;
-      --bg3: #09090d;
-      --panel: rgba(255,255,255,.05);
-      --panel-border: rgba(255,255,255,.08);
-      --text: #f2f2f2;
-      --muted: #cfcfda;
-      --size: 120px;
-      --pip: 14px;
+      --bg: #000000;
+      --fg: #ffffff;
+      --muted: #6f6f6f;
+      --size: 96px;
+      --pip: 10px;
+      --gap: 20px;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+      image-rendering: pixelated;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: Arial, Helvetica, sans-serif;
+    }
 
     body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, var(--bg1) 0%, var(--bg2) 45%, var(--bg3) 100%);
-      color: var(--text);
       overflow-x: hidden;
-      overflow-y: auto;
     }
 
     .wrap {
-      width: min(92vw, 900px);
+      width: min(92vw, 520px);
       margin: 0 auto;
-      padding: 24px;
+      padding: 28px 16px 32px;
       display: grid;
-      gap: 24px;
+      gap: var(--gap);
       justify-items: center;
     }
 
+    .titlebox {
+      width: 100%;
+      text-align: center;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+      border: none;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(18px, 4vw, 24px);
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 6px;
+    }
+
+    .subtitle {
+      display: none;
+    }
+
     .scene {
-      width: 260px;
-      height: 260px;
-      perspective: 900px;
+      width: 180px;
+      height: 180px;
+      perspective: 800px;
       display: grid;
       place-items: center;
       position: relative;
+      border: none;
+      padding: 0;
     }
 
     .shadow {
-      position: absolute;
-      width: 170px;
-      height: 170px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,0,0,.48), rgba(0,0,0,0) 70%);
-      filter: blur(12px);
-      transform: translateY(78px);
+      display: none;
     }
 
     .cube {
@@ -72,11 +91,10 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      padding: 14px;
-      border-radius: 22px;
-      background: linear-gradient(145deg, #fefefe, #dddddd);
-      border: 1px solid rgba(255,255,255,.35);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.25), 0 10px 24px rgba(0,0,0,.35);
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #000;
+      box-shadow: 0 0 0 1px #fff;
       backface-visibility: hidden;
     }
 
@@ -85,9 +103,9 @@
       height: var(--pip);
       align-self: center;
       justify-self: center;
-      border-radius: 50%;
-      background: #111;
+      background: #000;
       opacity: 0;
+      box-shadow: none;
     }
 
     .show { opacity: 1; }
@@ -102,35 +120,62 @@
     .controls {
       display: flex;
       justify-content: center;
+      width: 100%;
+    }
+
+    button, input {
+      font-family: inherit;
     }
 
     button {
       appearance: none;
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: 999px;
-      background: #f6f6f6;
-      color: #111;
-      font-weight: 800;
-      letter-spacing: .03em;
-      padding: 14px 22px;
+      border: 1px solid #fff;
+      background: transparent;
+      color: #fff;
+      padding: 10px 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
       cursor: pointer;
-      transition: transform .15s ease, opacity .15s ease;
-      box-shadow: 0 10px 24px rgba(0,0,0,.22);
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: none;
+      transition: background .12s ease, color .12s ease, opacity .12s ease;
     }
 
-    button:hover { transform: translateY(-1px); }
-    button:active { transform: translateY(1px) scale(.99); }
-    button:disabled { opacity: .55; cursor: wait; }
+    button:hover {
+      background: #fff;
+      color: #000;
+    }
+
+    button:active {
+      opacity: 0.7;
+      transform: none;
+      box-shadow: none;
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: wait;
+    }
 
     .stats {
-      width: min(92vw, 520px);
+      width: 100%;
       display: grid;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 18px;
-      background: var(--panel);
-      border: 1px solid var(--panel-border);
-      backdrop-filter: blur(6px);
+      gap: 14px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .panel-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--muted);
+      border-bottom: none;
+      padding-bottom: 0;
+      text-align: center;
     }
 
     .chart-wrap {
@@ -142,69 +187,60 @@
       display: grid;
       grid-template-columns: 14px 1fr 26px;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .chart-label,
     .chart-value {
-      font-weight: 700;
-      color: #e8e8ef;
-      font-size: .72rem;
+      font-weight: 400;
+      font-size: 11px;
+      color: #fff;
     }
 
     .chart-bar-box {
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.08);
+      height: 8px;
+      border: none;
+      background: #1a1a1a;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,.06);
     }
 
     .chart-bar {
       height: 100%;
       width: 0%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(255,255,255,.95), rgba(210,210,220,.65));
-      transition: width .25s ease;
+      background: #fff;
+      transition: width .18s linear;
     }
 
     .metrics-wrap {
       display: grid;
-      gap: 10px;
+      gap: 14px;
       justify-items: center;
-      padding-top: 2px;
     }
 
     .total-wrap {
       display: grid;
       gap: 4px;
       justify-items: center;
+      width: 100%;
+      border: none;
+      padding: 4px 0 0;
+      background: transparent;
     }
 
     .total-label {
-      font-size: .72rem;
-      color: #d7d7e2;
-      font-weight: 700;
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 3px;
     }
 
     .total-value {
-      font-size: 1.5rem;
+      font-size: 24px;
       line-height: 1;
-      font-weight: 900;
-      color: #ffffff;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: none;
     }
-
-    .reset-small {
-      padding: 6px 10px;
-      border-radius: 4px;
-      font-size: .72rem;
-      letter-spacing: .02em;
-      min-width: 0;
-      background: rgba(255,255,255,.08);
-      color: #f2f2f2;
-      box-shadow: none;
-    }
-
 
     .actions-wrap {
       width: 100%;
@@ -216,73 +252,64 @@
 
     .bulk-wrap {
       display: grid;
-      grid-template-columns: 72px auto;
+      grid-template-columns: 70px auto;
       align-items: center;
       gap: 6px;
       justify-self: start;
     }
 
     .bulk-wrap input {
-      width: 72px;
-      padding: 6px 8px;
-      border-radius: 4px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.07);
-      color: #f2f2f2;
-      font-size: .72rem;
+      width: 70px;
+      padding: 9px 7px;
+      border: 1px solid #fff;
+      background: transparent;
+      color: #fff;
+      font-size: 11px;
+      min-width: 0;
+      outline: none;
+    }
+
+    .reset-small,
+    .bulk-small {
+      padding: 9px 10px;
+      font-size: 10px;
       min-width: 0;
     }
 
-    .bulk-small {
-      padding: 6px 10px;
-      border-radius: 4px;
-      font-size: .72rem;
-      letter-spacing: .02em;
-      min-width: 0;
-      background: rgba(255,255,255,.08);
-      color: #f2f2f2;
-      box-shadow: none;
+    .footer-note {
+      display: none;
     }
 
     @media (max-width: 640px) {
       :root {
-        --size: 104px;
-        --pip: 12px;
+        --size: 88px;
+        --pip: 9px;
       }
+
       .scene {
-        width: 220px;
-        height: 220px;
+        width: 164px;
+        height: 164px;
       }
-      .stats {
-        width: min(94vw, 560px);
-        padding: 14px;
-      }
-      .chart-row {
-        grid-template-columns: 16px 1fr 30px;
-        gap: 8px;
-      }
-      .chart-label,
-      .chart-value,
-      .total-label,
-      .reset-small,
-      .bulk-small,
-      .bulk-wrap input {
-        font-size: .78rem;
-      }
-      .total-value {
-        font-size: 1.8rem;
-      }
-      .chart-bar-box {
-        height: 14px;
-      }
+
       .actions-wrap {
         grid-template-columns: 1fr;
       }
+
+      .bulk-wrap {
+        width: 100%;
+        grid-template-columns: 68px 1fr;
+      }
     }
+
   </style>
 </head>
 <body>
   <main class="wrap">
+    <section class="titlebox" aria-label="Titolo interfaccia">
+      <h1 class="title">DADO</h1>
+      
+    </section>
+
     <div class="scene" aria-label="Animazione dado">
       <div class="shadow"></div>
       <div class="cube" id="cube">
@@ -323,7 +350,9 @@
       <button id="rollBtn">Lancia il dado</button>
     </div>
 
-    <div class="stats">
+    <section class="stats">
+      <div class="panel-title">statistiche</div>
+
       <div class="chart-wrap" aria-label="Istogramma dei lanci">
         <div class="chart-row"><span class="chart-label">1</span><div class="chart-bar-box"><div class="chart-bar" id="bar1"></div></div><span class="chart-value" id="count1">0</span></div>
         <div class="chart-row"><span class="chart-label">2</span><div class="chart-bar-box"><div class="chart-bar" id="bar2"></div></div><span class="chart-value" id="count2">0</span></div>
@@ -338,16 +367,17 @@
           <div class="total-label">Totale lanci</div>
           <div id="totalCount" class="total-value">0</div>
         </div>
+
         <div class="actions-wrap">
           <div class="bulk-wrap">
             <input id="bulkCount" type="number" min="1" step="1" value="100" aria-label="Numero di lanci casuali" />
-            <button id="bulkBtn" class="bulk-small">Lancia per X volte</button>
+            <button id="bulkBtn" class="bulk-small">Lancia X volte</button>
           </div>
           <button id="resetBtn" class="reset-small">Azzera</button>
         </div>
       </div>
-    </div>
-  </main>
+    </section>
+</main>
 
   <script>
     const cube = document.getElementById('cube');
@@ -425,7 +455,7 @@
       currentX = base.x + spinsX;
       currentY = base.y + spinsY;
 
-      cube.style.transition = 'transform 1.35s cubic-bezier(.2,.8,.2,1)';
+      cube.style.transition = 'transform 1.15s steps(28)';
       applyTransform(currentX, currentY);
 
       const onDone = () => {
@@ -452,11 +482,10 @@
       setTimeout(() => {
         if (!rolling) return;
         onDone();
-      }, 1500);
+      }, 1300);
     }
 
     rollBtn.addEventListener('click', rollDice);
-
 
     bulkBtn.addEventListener('click', () => {
       if (rolling) return;
