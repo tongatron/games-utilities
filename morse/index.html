@@ -215,6 +215,19 @@
     }
     input[type=range] { width: 96px; accent-color: var(--hi); }
 
+    .io-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      width: 100%;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      margin-top: 4px;
+    }
+    .io-label { font-size: .58rem; color: var(--dim); letter-spacing: .18em; white-space: nowrap; }
+    #io-msg { font-size: .60rem; color: var(--dim); transition: opacity .3s; margin-left: 4px; }
+
     #osc, #env { display:block; width:100%; background:#060606; border:1px solid #171717; }
     #osc { height: 200px; }
     #env { height: 100px; margin-top: 8px; }
@@ -310,6 +323,13 @@
         VEL:
         <input type="range" id="speed" min="1" max="5" value="3" />
         <span id="spd-val">3</span>
+      </div>
+      <div class="io-row">
+        <span class="io-label">▸ SEGNALE:</span>
+        <button class="btn" onclick="shareUrl()">⬡ CONDIVIDI URL</button>
+        <button class="btn" onclick="exportJson()">↓ ESPORTA JSON</button>
+        <label class="btn" style="cursor:pointer">↑ IMPORTA JSON<input type="file" accept=".json" style="display:none" onchange="importJson(event)"/></label>
+        <span id="io-msg"></span>
       </div>
     </div>
 
@@ -1027,6 +1047,83 @@
     document.getElementById('txt').addEventListener('keydown', e => {
       if (e.key === 'Enter') startTx();
     });
+
+    function showIoMsg(msg) {
+      const el = document.getElementById('io-msg');
+      el.textContent = msg;
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.textContent = ''; }, 3000);
+    }
+
+    function shareUrl() {
+      const text = document.getElementById('txt').value.trim();
+      const speed = document.getElementById('speed').value;
+      if (!text) { showIoMsg('nessun testo da condividere'); return; }
+      const encoded = btoa(unescape(encodeURIComponent(text)));
+      const url = location.href.split('#')[0] + '#t=' + encoded + '&s=' + speed;
+      navigator.clipboard.writeText(url).then(() => {
+        showIoMsg('URL copiato negli appunti ✓');
+      }).catch(() => {
+        prompt('Copia questo URL:', url);
+      });
+    }
+
+    function exportJson() {
+      const text = document.getElementById('txt').value.trim();
+      const speed = parseInt(document.getElementById('speed').value);
+      const data = {
+        testo: text,
+        velocita: speed,
+        codice: encodeText(text).map(i => i.code).join(' ')
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'morse_' + (text.slice(0, 16).replace(/\s+/g, '_') || 'segnale') + '.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showIoMsg('file esportato ✓');
+    }
+
+    function importJson(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const d = JSON.parse(ev.target.result);
+          if (d.testo !== undefined) {
+            document.getElementById('txt').value = d.testo;
+            if (d.velocita) {
+              document.getElementById('speed').value = d.velocita;
+              document.getElementById('spd-val').textContent = d.velocita;
+            }
+            const preview = d.testo.slice(0, 30) + (d.testo.length > 30 ? '…' : '');
+            showIoMsg('importato: "' + preview + '"');
+          } else {
+            showIoMsg('errore: campo "testo" mancante');
+          }
+        } catch { showIoMsg('errore: file non valido'); }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    }
+
+    // Auto-load from URL hash on page open
+    (function () {
+      try {
+        const hash = location.hash.slice(1);
+        if (!hash) return;
+        const params = Object.fromEntries(hash.split('&').map(p => p.split('=')));
+        if (params.t) {
+          document.getElementById('txt').value = decodeURIComponent(escape(atob(params.t)));
+          if (params.s) {
+            document.getElementById('speed').value = params.s;
+            document.getElementById('spd-val').textContent = params.s;
+          }
+        }
+      } catch (e) {}
+    })();
   </script>
 </body>
 </html>
