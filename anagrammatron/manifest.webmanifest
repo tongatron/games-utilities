@@ -1,0 +1,18 @@
+{
+  "name": "Anagrammatron",
+  "short_name": "Anagrammatron",
+  "description": "Generatore di anagrammi installabile e offline-first.",
+  "lang": "it",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f0f10",
+  "theme_color": "#0f0f10",
+  "icons": [
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

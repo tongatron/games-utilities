@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f0f10" />
+  <meta
+    name="description"
+    content="Anagrammatron: generatore di anagrammi installabile, offline e pronto per evolvere in interfaccia AI."
+  />
+  <title>Anagrammatron</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero">
+      <div class="brand-lockup">
+        <img class="brand-mark" src="./assets/icon.svg" alt="Logo Anagrammatron" />
+        <div>
+          <p class="eyebrow">PWA alpha</p>
+          <h1>Anagrammatron</h1>
+        </div>
+      </div>
+      <p class="intro">
+        Un laboratorio tipografico per scomporre nomi, frasi e parole nel browser.
+        Interfaccia pubblica essenziale, motore separato e spazio pronto per un
+        futuro layer AI che filtra e ordina i risultati migliori.
+      </p>
+    </section>
+
+    <section class="panel panel-status">
+      <div class="panel-heading">
+        <h2>Stato</h2>
+        <span id="appMode" class="pill">Browser locale</span>
+      </div>
+      <div class="status" id="dictionaryStatus">Nessun dizionario caricato.</div>
+      <div class="status secondary" id="workerStatus">
+        Motore pronto. In attesa di lettere da massacrare.
+      </div>
+    </section>
+
+    <section class="grid">
+      <section class="panel">
+        <h2>Dizionari</h2>
+
+        <label for="presetDictionary">Dizionario incluso</label>
+        <div class="inline-row">
+          <select id="presetDictionary">
+            <option value="">Seleziona un dizionario incluso</option>
+            <option value="./dizionari/1000_parole_italiane_comuni.txt">
+              1000 parole italiane comuni
+            </option>
+            <option value="./dizionari/italiano-base.txt">
+              Italiano base
+            </option>
+            <option value="./dizionari/italiano-extra.txt">
+              Italiano extra
+            </option>
+            <option value="./dizionari/400_parole_composte.txt">
+              Parole composte
+            </option>
+          </select>
+          <button type="button" id="loadPresetButton">Carica</button>
+        </div>
+
+        <label for="dictionaryFiles">Importa file dizionario .txt</label>
+        <input id="dictionaryFiles" type="file" accept=".txt,text/plain" multiple />
+
+        <label for="dictionaryFolder">Oppure importa una cartella intera</label>
+        <input id="dictionaryFolder" type="file" webkitdirectory multiple />
+
+        <button type="button" id="importButton">Importa dizionari selezionati</button>
+
+        <label for="dictionary">Parole caricate</label>
+        <textarea id="dictionary" rows="12"></textarea>
+
+        <label for="importLog">Log importazione</label>
+        <div id="importLog" class="status log">Nessun log.</div>
+      </section>
+
+      <section class="panel">
+        <h2>Generatore</h2>
+
+        <label for="inputText">Frase da anagrammare</label>
+        <input id="inputText" value="Giovanni Bindi" />
+
+        <div class="input-grid">
+          <div>
+            <label for="maxWords">Numero massimo parole</label>
+            <input id="maxWords" type="number" value="4" min="1" max="6" />
+          </div>
+          <div>
+            <label for="limit">Limite risultati</label>
+            <input id="limit" type="number" value="100" min="1" max="1000" />
+          </div>
+        </div>
+
+        <button type="button" id="generateButton">Genera anagrammi</button>
+
+        <div class="panel-heading results-heading">
+          <h2>Risultati</h2>
+          <span id="resultCount" class="pill muted-pill">0 risultati</span>
+        </div>
+        <div id="results" class="muted">
+          Carica un dizionario e poi prova a scomporre il mondo.
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
